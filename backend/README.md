@@ -1,98 +1,364 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# NestJS Posts Management Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A robust NestJS backend application demonstrating dependency injection, JWT authentication, and CRUD operations for posts management.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- **JWT Authentication**: Secure user registration and login
+- **Posts Management**: Full CRUD operations for posts
+- **TypeORM Integration**: SQLite database with TypeORM
+- **Dependency Injection**: Proper service and repository patterns
+- **Validation**: Request validation with class-validator
+- **Error Handling**: Global exception filters
+- **TypeScript**: Fully typed implementation
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Tech Stack
 
-## Project setup
+- NestJS Framework
+- TypeORM with SQLite
+- JWT Authentication
+- bcryptjs for password hashing
+- class-validator for validation
+- TypeScript
+
+## Installation
 
 ```bash
-$ yarn install
+npm install
 ```
 
-## Compile and run the project
+## Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
+JWT_EXPIRES_IN=1h
+DATABASE_URL=./database.sqlite
+```
+
+## Running the Application
 
 ```bash
-# development
-$ yarn run start
+# Development mode
+npm run start:dev
 
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+# Production mode
+npm run start:prod
 ```
 
-## Run tests
+The API will be available at `http://localhost:3000/api`
 
+## API Documentation
+
+### Authentication Endpoints
+
+#### Register User
+- **POST** `/api/auth/signup`
+- **Description**: Register a new user
+- **Request Body**:
+```json
+{
+  "email": "user@example.com",
+  "password": "password123",
+  "firstName": "John",
+  "lastName": "Doe"
+}
+```
+- **Response**:
+```json
+{
+  "access_token": "jwt_token_here",
+  "user": {
+    "id": 1,
+    "email": "user@example.com",
+    "firstName": "John",
+    "lastName": "Doe"
+  }
+}
+```
+
+#### Login User
+- **POST** `/api/auth/login`
+- **Description**: Login an existing user
+- **Request Body**:
+```json
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+- **Response**:
+```json
+{
+  "access_token": "jwt_token_here",
+  "user": {
+    "id": 1,
+    "email": "user@example.com",
+    "firstName": "John",
+    "lastName": "Doe"
+  }
+}
+```
+
+### Posts Endpoints
+
+All posts endpoints require authentication. Include the JWT token in the Authorization header:
+```
+Authorization: Bearer your_jwt_token_here
+```
+
+#### Create Post
+- **POST** `/api/posts`
+- **Description**: Create a new post
+- **Request Body**:
+```json
+{
+  "title": "My First Post",
+  "content": "This is the content of my first post.",
+  "published": true
+}
+```
+- **Response**:
+```json
+{
+  "id": 1,
+  "title": "My First Post",
+  "content": "This is the content of my first post.",
+  "published": true,
+  "createdAt": "2025-06-16T10:00:00.000Z",
+  "updatedAt": "2025-06-16T10:00:00.000Z",
+  "authorId": 1,
+  "author": {
+    "id": 1,
+    "email": "user@example.com",
+    "firstName": "John",
+    "lastName": "Doe"
+  }
+}
+```
+
+#### Get All Posts
+- **GET** `/api/posts`
+- **Description**: Retrieve all posts from all users
+- **Response**:
+```json
+[
+  {
+    "id": 1,
+    "title": "My First Post",
+    "content": "This is the content of my first post.",
+    "published": true,
+    "createdAt": "2025-06-16T10:00:00.000Z",
+    "updatedAt": "2025-06-16T10:00:00.000Z",
+    "authorId": 1,
+    "author": {
+      "id": 1,
+      "email": "user@example.com",
+      "firstName": "John",
+      "lastName": "Doe"
+    }
+  }
+]
+```
+
+#### Get My Posts
+- **GET** `/api/posts/my-posts`
+- **Description**: Retrieve posts created by the authenticated user
+- **Response**: Same as "Get All Posts" but filtered by current user
+
+#### Get Post by ID
+- **GET** `/api/posts/:id`
+- **Description**: Retrieve a specific post by ID
+- **Parameters**: 
+  - `id` (number) - Post ID
+- **Response**: Same as single post object from "Create Post"
+
+#### Update Post
+- **PATCH** `/api/posts/:id`
+- **Description**: Update a post (only the author can update their own posts)
+- **Parameters**: 
+  - `id` (number) - Post ID
+- **Request Body** (all fields optional):
+```json
+{
+  "title": "Updated Post Title",
+  "content": "Updated content.",
+  "published": false
+}
+```
+- **Response**: Updated post object
+
+#### Delete Post
+- **DELETE** `/api/posts/:id`
+- **Description**: Delete a post (only the author can delete their own posts)
+- **Parameters**: 
+  - `id` (number) - Post ID
+- **Response**: `204 No Content`
+
+## Data Models
+
+### User Entity
+```typescript
+{
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  createdAt: Date;
+  updatedAt: Date;
+  posts: Post[];
+}
+```
+
+### Post Entity
+```typescript
+{
+  id: number;
+  title: string;
+  content: string;
+  published: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  author: User;
+  authorId: number;
+}
+```
+
+## Error Responses
+
+All endpoints return standardized error responses:
+
+```json
+{
+  "statusCode": 400,
+  "timestamp": "2025-06-16T10:00:00.000Z",
+  "path": "/api/posts",
+  "method": "POST",
+  "message": "Validation failed"
+}
+```
+
+
+
+## Architecture
+
+### Dependency Injection Flow
+
+```
+Controller → Service → Repository → Database
+```
+
+- **Controllers**: Handle HTTP requests and responses
+- **Services**: Contain business logic and orchestrate operations
+- **Repositories**: Handle direct database interactions
+- **Guards**: Protect routes with JWT authentication
+- **Pipes**: Validate and transform request data
+- **Filters**: Handle exceptions globally
+
+### Key Design Patterns
+
+1. **Repository Pattern**: Separates data access logic
+2. **Service Layer**: Encapsulates business logic
+3. **Dependency Injection**: Manages component dependencies
+4. **Custom Decorators**: Simplify common operations (e.g., @CurrentUser)
+5. **Global Exception Handling**: Consistent error responses
+
+## Project Structure
+
+```
+src/
+├── auth/                   # Authentication module
+│   ├── dto/               # Data Transfer Objects
+│   ├── auth.controller.ts # Auth endpoints
+│   ├── auth.service.ts    # Auth business logic
+│   ├── auth.module.ts     # Auth module configuration
+│   ├── jwt.strategy.ts    # JWT authentication strategy
+│   └── user.repository.ts # User data access
+├── posts/                 # Posts module
+│   ├── dto/              # Data Transfer Objects
+│   ├── posts.controller.ts
+│   ├── posts.service.ts
+│   ├── posts.module.ts
+│   └── post.repository.ts
+├── database/
+│   └── entities/         # TypeORM entities
+├── common/               # Shared components
+│   ├── decorators/       # Custom decorators
+│   ├── guards/          # Route guards
+│   └── filters/         # Exception filters
+└── app.module.ts        # Root module
+```
+
+## Testing the API
+
+You can test the API using curl, Postman, or any HTTP client:
+
+### 1. Register a new user
 ```bash
-# unit tests
-$ yarn run test
-
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+curl -X POST http://localhost:3000/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "password123",
+    "firstName": "Test",
+    "lastName": "User"
+  }'
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
+### 2. Login
 ```bash
-$ yarn install -g @nestjs/mau
-$ mau deploy
+curl -X POST http://localhost:3000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "password123"
+  }'
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 3. Create a post (use token from login response)
+```bash
+curl -X POST http://localhost:3000/api/posts \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "title": "My First Post",
+    "content": "This is my first post content",
+    "published": true
+  }'
+```
 
-## Resources
+### 4. Get all posts
+```bash
+curl -X GET http://localhost:3000/api/posts \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+## Development
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Building the project
+```bash
+npm run build
+```
 
-## Support
+### Running tests
+```bash
+# Unit tests
+npm run test
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+# E2E tests
+npm run test:e2e
 
-## Stay in touch
+# Test coverage
+npm run test:cov
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Code formatting
+```bash
+npm run format
+```
 
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Linting
+```bash
+npm run lint
+```
