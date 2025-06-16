@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PostRepository } from './post.repository';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -28,7 +32,11 @@ export class PostsService {
     return await this.postRepository.findByAuthor(authorId);
   }
 
-  async update(id: number, updatePostDto: UpdatePostDto, userId: number): Promise<Post> {
+  async update(
+    id: number,
+    updatePostDto: UpdatePostDto,
+    userId: number,
+  ): Promise<Post> {
     const post = await this.postRepository.findById(id);
     if (!post) {
       throw new NotFoundException(`Post with ID ${id} not found`);

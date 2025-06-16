@@ -1,12 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsRelations, Repository } from 'typeorm';
 import { Post } from '../database/entities/post.entity';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 
 @Injectable()
 export class PostRepository {
+  private readonly postRelations = ['author'] as FindOptionsRelations<Post>;
+  private readonly postSelect = {
+    author: {
+      id: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  };
+
   constructor(
     @InjectRepository(Post)
     private readonly postRepository: Repository<Post>,
@@ -22,7 +34,8 @@ export class PostRepository {
 
   async findAll(): Promise<Post[]> {
     return await this.postRepository.find({
-      relations: ['author'],
+      relations: this.postRelations,
+      select: this.postSelect,
       order: { createdAt: 'DESC' },
     });
   }
@@ -30,14 +43,16 @@ export class PostRepository {
   async findById(id: number): Promise<Post | null> {
     return await this.postRepository.findOne({
       where: { id },
-      relations: ['author'],
+      relations: this.postRelations,
+      select: this.postSelect,
     });
   }
 
   async findByAuthor(authorId: number): Promise<Post[]> {
     return await this.postRepository.find({
       where: { authorId },
-      relations: ['author'],
+      relations: this.postRelations,
+      select: this.postSelect,
       order: { createdAt: 'DESC' },
     });
   }
@@ -55,7 +70,8 @@ export class PostRepository {
   async findByAuthorAndId(authorId: number, id: number): Promise<Post | null> {
     return await this.postRepository.findOne({
       where: { id, authorId },
-      relations: ['author'],
+      relations: this.postRelations,
+      select: this.postSelect,
     });
   }
 }
