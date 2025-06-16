@@ -51,6 +51,6 @@ export class UserRepository {
 
   async delete(id: number): Promise<boolean> {
     const result = await this.userRepository.delete(id);
-    return result.affected > 0;
+    return (result.affected ?? 0) > 0;
   }
 }

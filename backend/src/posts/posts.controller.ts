@@ -55,10 +55,7 @@ export class PostsController {
   }
 
   @Delete(':id')
-  remove(
-    @Param('id', ParseIntPipe) id: number,
-    @CurrentUser() user: User,
-  ) {
+  remove(@Param('id', ParseIntPipe) id: number, @CurrentUser() user: User) {
     return this.postsService.remove(id, user.id);
   }
 }

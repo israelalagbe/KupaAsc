@@ -9,12 +9,16 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
-  async signUp(@Body(ValidationPipe) signUpDto: SignUpDto): Promise<AuthResponseDto> {
+  async signUp(
+    @Body(ValidationPipe) signUpDto: SignUpDto,
+  ): Promise<AuthResponseDto> {
     return await this.authService.signUp(signUpDto);
   }
 
   @Post('login')
-  async login(@Body(ValidationPipe) loginDto: LoginDto): Promise<AuthResponseDto> {
+  async login(
+    @Body(ValidationPipe) loginDto: LoginDto,
+  ): Promise<AuthResponseDto> {
     return await this.authService.login(loginDto);
   }
 }

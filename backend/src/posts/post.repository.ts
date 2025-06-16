@@ -49,7 +49,7 @@ export class PostRepository {
 
   async delete(id: number): Promise<boolean> {
     const result = await this.postRepository.delete(id);
-    return result.affected > 0;
+    return (result.affected ?? 0) > 0;
   }
 
   async findByAuthorAndId(authorId: number, id: number): Promise<Post | null> {
