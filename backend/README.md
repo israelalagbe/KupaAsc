@@ -334,6 +334,36 @@ curl -X GET http://localhost:3000/api/posts \
   -H "Authorization: Bearer YOUR_JWT_TOKEN"
 ```
 
+### 5. Get my posts
+```bash
+curl -X GET http://localhost:3000/api/posts/my-posts \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+### 6. Get a specific post
+```bash
+curl -X GET http://localhost:3000/api/posts/1 \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+### 7. Update a post
+```bash
+curl -X PATCH http://localhost:3000/api/posts/1 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "title": "Updated Post Title",
+    "content": "Updated content goes here",
+    "published": false
+  }'
+```
+
+### 8. Delete a post
+```bash
+curl -X DELETE http://localhost:3000/api/posts/1 \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
 ## Development
 
 ### Building the project
