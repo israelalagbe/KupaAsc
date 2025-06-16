@@ -362,3 +362,7 @@ npm run format
 ```bash
 npm run lint
 ```
+
+### Test Database
+
+Tests use an in-memory SQLite database that is created fresh for each test run, ensuring test isolation and consistency.
