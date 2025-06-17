@@ -75,6 +75,30 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
 
   const isAuthenticated = Boolean(state.user);
 
+  // Helper to handle async actions with loading/error states
+  const withAsyncHandler = useCallback(async (
+    action: () => Promise<void>,
+    errorMessage: string
+  ) => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    try {
+      await action();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : errorMessage;
+      dispatch({ type: 'SET_ERROR', payload: message });
+      throw error;
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  }, []);
+
+  // Helper for auth actions
+  const handleAuthSuccess = useCallback((response: AuthResponse) => {
+    localStorage.setItem('token', response.access_token);
+    localStorage.setItem('user', JSON.stringify(response.user));
+    dispatch({ type: 'SET_USER', payload: response.user });
+  }, []);
+
   // Initialize user from localStorage
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -89,55 +113,66 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
     }
   }, []);
 
-  // Auto-fetch posts when authenticated
-  const fetchPosts = useCallback(async () => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-    try {
+  // Actions
+  const fetchPosts = useCallback(() => withAsyncHandler(
+    async () => {
       const posts = await apiClient.getAllPosts();
       dispatch({ type: 'SET_POSTS', payload: posts });
-    } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Failed to fetch posts' });
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  }, []);
+    },
+    'Failed to fetch posts'
+  ), [withAsyncHandler]);
 
-  useEffect(() => {
-    if (isAuthenticated) fetchPosts();
-  }, [isAuthenticated, fetchPosts]);
+  const fetchMyPosts = useCallback(() => withAsyncHandler(
+    async () => {
+      const posts = await apiClient.getMyPosts();
+      dispatch({ type: 'SET_POSTS', payload: posts });
+    },
+    'Failed to fetch your posts'
+  ), [withAsyncHandler]);
 
-  // Auth actions
-  const login = useCallback(async (email: string, password: string) => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-    try {
-      const response: AuthResponse = await apiClient.login({ email, password });
-      localStorage.setItem('token', response.access_token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      dispatch({ type: 'SET_USER', payload: response.user });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Login failed';
-      dispatch({ type: 'SET_ERROR', payload: message });
-      throw error;
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  }, []);
+  const login = useCallback((email: string, password: string) => withAsyncHandler(
+    async () => {
+      const response = await apiClient.login({ email, password });
+      handleAuthSuccess(response);
+    },
+    'Login failed'
+  ), [withAsyncHandler, handleAuthSuccess]);
 
-  const signup = useCallback(async (email: string, password: string, firstName: string, lastName: string) => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-    try {
-      const response: AuthResponse = await apiClient.signup({ email, password, firstName, lastName });
-      localStorage.setItem('token', response.access_token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      dispatch({ type: 'SET_USER', payload: response.user });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Signup failed';
-      dispatch({ type: 'SET_ERROR', payload: message });
-      throw error;
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  }, []);
+  const signup = useCallback((email: string, password: string, firstName: string, lastName: string) => withAsyncHandler(
+    async () => {
+      const response = await apiClient.signup({ email, password, firstName, lastName });
+      handleAuthSuccess(response);
+    },
+    'Signup failed'
+  ), [withAsyncHandler, handleAuthSuccess]);
+
+  const createPost = useCallback((title: string, content: string, published = true) => withAsyncHandler(
+    async () => {
+      await apiClient.createPost({ title, content, published });
+      await fetchPosts();
+    },
+    'Failed to create post'
+  ), [withAsyncHandler, fetchPosts]);
+
+  const updatePost = useCallback((id: number, title?: string, content?: string, published?: boolean) => withAsyncHandler(
+    async () => {
+      const updateData: Record<string, any> = {};
+      if (title !== undefined) updateData.title = title;
+      if (content !== undefined) updateData.content = content;
+      if (published !== undefined) updateData.published = published;
+      const post = await apiClient.updatePost(id, updateData);
+      dispatch({ type: 'UPDATE_POST', payload: post });
+    },
+    'Failed to update post'
+  ), [withAsyncHandler]);
+
+  const deletePost = useCallback((id: number) => withAsyncHandler(
+    async () => {
+      await apiClient.deletePost(id);
+      dispatch({ type: 'DELETE_POST', payload: id });
+    },
+    'Failed to delete post'
+  ), [withAsyncHandler]);
 
   const logout = useCallback(() => {
     localStorage.removeItem('token');
@@ -146,69 +181,14 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
     dispatch({ type: 'SET_POSTS', payload: [] });
   }, []);
 
-  // Post actions
-  const fetchMyPosts = useCallback(async () => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-    try {
-      const posts = await apiClient.getMyPosts();
-      dispatch({ type: 'SET_POSTS', payload: posts });
-    } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Failed to fetch your posts' });
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  }, []);
-
-  const createPost = useCallback(async (title: string, content: string, published = true) => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-    try {
-      await apiClient.createPost({ title, content, published });
-      await fetchPosts(); // Refresh all posts
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to create post';
-      dispatch({ type: 'SET_ERROR', payload: message });
-      throw error;
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  }, [fetchPosts]);
-
-  const updatePost = useCallback(async (id: number, title?: string, content?: string, published?: boolean) => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-    try {
-      const updateData: any = {};
-      if (title !== undefined) updateData.title = title;
-      if (content !== undefined) updateData.content = content;
-      if (published !== undefined) updateData.published = published;
-      
-      const post = await apiClient.updatePost(id, updateData);
-      dispatch({ type: 'UPDATE_POST', payload: post });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to update post';
-      dispatch({ type: 'SET_ERROR', payload: message });
-      throw error;
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  }, []);
-
-  const deletePost = useCallback(async (id: number) => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-    try {
-      await apiClient.deletePost(id);
-      dispatch({ type: 'DELETE_POST', payload: id });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Failed to delete post';
-      dispatch({ type: 'SET_ERROR', payload: message });
-      throw error;
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  }, []);
-
   const clearError = useCallback(() => {
     dispatch({ type: 'SET_ERROR', payload: null });
   }, []);
+
+  // Auto-fetch posts when authenticated
+  useEffect(() => {
+    if (isAuthenticated) fetchPosts();
+  }, [isAuthenticated, fetchPosts]);
 
   const value: PostsContextValue = {
     ...state,

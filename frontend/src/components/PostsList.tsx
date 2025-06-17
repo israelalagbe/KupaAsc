@@ -18,7 +18,7 @@ interface EditingPost {
 }
 
 export default function PostsList({ posts, showOnlyUserPosts, currentUserId }: PostsListProps) {
-  const { updatePost, deletePost, loading } = usePosts();
+  const { updatePost, deletePost, loading, clearError } = usePosts();
   const [editingPost, setEditingPost] = useState<EditingPost | null>(null);
 
   // Filter posts based on the current tab
@@ -38,6 +38,7 @@ export default function PostsList({ posts, showOnlyUserPosts, currentUserId }: P
   const handleSaveEdit = async () => {
     if (!editingPost) return;
 
+    clearError(); // Clear any previous errors
     try {
       await updatePost(
         editingPost.id,
@@ -57,6 +58,7 @@ export default function PostsList({ posts, showOnlyUserPosts, currentUserId }: P
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this post?')) {
+      clearError(); // Clear any previous errors
       try {
         await deletePost(id);
       } catch (error) {
@@ -164,10 +166,10 @@ export default function PostsList({ posts, showOnlyUserPosts, currentUserId }: P
               <div className="flex gap-2">
                 <button
                   onClick={handleSaveEdit}
-                  disabled={loading.update}
+                  disabled={loading}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50"
                 >
-                  {loading.update ? 'Saving...' : 'Save'}
+                  {loading ? 'Saving...' : 'Save'}
                 </button>
                 <button
                   onClick={handleCancelEdit}
@@ -212,10 +214,10 @@ export default function PostsList({ posts, showOnlyUserPosts, currentUserId }: P
                     </button>
                     <button
                       onClick={() => handleDelete(post.id)}
-                      disabled={loading.delete}
+                      disabled={loading}
                       className="text-red-600 hover:text-red-800 text-sm font-medium disabled:opacity-50"
                     >
-                      {loading.delete ? 'Deleting...' : 'Delete'}
+                      {loading ? 'Deleting...' : 'Delete'}
                     </button>
                   </div>
                 )}

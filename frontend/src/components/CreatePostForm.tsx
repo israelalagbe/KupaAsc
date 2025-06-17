@@ -10,10 +10,11 @@ export default function CreatePostForm() {
     published: true,
   });
 
-  const { createPost, loading, error } = usePosts();
+  const { createPost, loading, error, clearError } = usePosts();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    clearError(); // Clear any previous errors
     
     try {
       await createPost(formData.title, formData.content, formData.published);
@@ -38,9 +39,9 @@ export default function CreatePostForm() {
 
   return (
     <div>
-      {error.create && (
+      {error && (
         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-          {error.create}
+          {error}
         </div>
       )}
 
@@ -91,10 +92,10 @@ export default function CreatePostForm() {
         
         <button
           type="submit"
-          disabled={loading.create}
+          disabled={loading}
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading.create ? 'Creating...' : 'Create Post'}
+          {loading ? 'Creating...' : 'Create Post'}
         </button>
       </form>
     </div>

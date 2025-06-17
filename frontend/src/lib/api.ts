@@ -12,10 +12,24 @@ class ApiClient {
   private async fetchWithAuth(url: string, options: RequestInit = {}) {
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...options.headers,
     };
+
+    // Add existing headers
+    if (options.headers) {
+      if (options.headers instanceof Headers) {
+        options.headers.forEach((value, key) => {
+          headers[key] = value;
+        });
+      } else if (Array.isArray(options.headers)) {
+        options.headers.forEach(([key, value]) => {
+          headers[key] = value;
+        });
+      } else {
+        Object.assign(headers, options.headers);
+      }
+    }
 
     if (token) {
       headers.Authorization = `Bearer ${token}`;
@@ -103,32 +117,48 @@ export const apiClient = new ApiClient();
 
 // Server-side data fetching functions (for server components)
 export async function fetchPostsOnServer(): Promise<Post[]> {
-  const response = await fetch(`${API_BASE_URL}/posts`, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    // Disable caching for development
-    cache: 'no-store'
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/posts`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Disable caching for development
+      cache: 'no-store'
+    });
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch posts: ${response.status}`);
+    if (!response.ok) {
+      // If posts require authentication, return empty array for server-side rendering
+      if (response.status === 401) {
+        console.warn('Posts require authentication, returning empty array for SSR');
+        return [];
+      }
+      throw new Error(`Failed to fetch posts: ${response.status}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching posts on server:', error);
+    // Return empty array for server-side rendering when there's an error
+    return [];
   }
-
-  return response.json();
 }
 
 export async function fetchPostOnServer(id: number): Promise<Post> {
-  const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    cache: 'no-store'
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store'
+    });
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch post: ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch post: ${response.status}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching post on server:', error);
+    throw error; // Re-throw for individual posts since they're typically accessed directly
   }
-
-  return response.json();
 }

@@ -12,10 +12,11 @@ export default function AuthForm() {
     lastName: '',
   });
 
-  const { login, signup, loading, error } = usePosts();
+  const { login, signup, loading, error, clearError } = usePosts();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    clearError(); // Clear any previous errors
     
     try {
       if (isLogin) {
@@ -44,9 +45,9 @@ export default function AuthForm() {
         </h2>
       </div>
 
-      {error.auth && (
+      {error && (
         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-          {error.auth}
+          {error}
         </div>
       )}
 
@@ -117,10 +118,10 @@ export default function AuthForm() {
         
         <button
           type="submit"
-          disabled={loading.auth}
+          disabled={loading}
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading.auth ? 'Processing...' : (isLogin ? 'Login' : 'Sign Up')}
+          {loading ? 'Processing...' : (isLogin ? 'Login' : 'Sign Up')}
         </button>
       </form>
 
@@ -128,6 +129,7 @@ export default function AuthForm() {
         <button
           onClick={() => setIsLogin(!isLogin)}
           className="text-blue-600 hover:text-blue-800 text-sm"
+          type="button"
         >
           {isLogin ? "Don't have an account? Sign up" : "Already have an account? Login"}
         </button>
