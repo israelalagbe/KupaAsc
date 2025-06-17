@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { usePosts } from '@/contexts/PostsContext';
 
-export default function AuthPage() {
+export default function LoginForm() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
