@@ -173,6 +173,31 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
     }
   }, []);
 
+  // Posts actions (defined first to avoid circular dependency)
+  const fetchPosts = useCallback(async () => {
+    dispatch({ type: 'SET_LOADING', payload: { type: 'posts', value: true } });
+    dispatch({ type: 'SET_ERROR', payload: { type: 'posts', value: null } });
+    
+    try {
+      const posts = await apiClient.getAllPosts();
+      dispatch({ type: 'SET_POSTS', payload: posts });
+    } catch (error) {
+      dispatch({ 
+        type: 'SET_ERROR', 
+        payload: { type: 'posts', value: error instanceof Error ? error.message : 'Failed to fetch posts' } 
+      });
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: { type: 'posts', value: false } });
+    }
+  }, []);
+
+  // Automatically fetch posts when user becomes authenticated
+  React.useEffect(() => {
+    if (state.isAuthenticated) {
+      fetchPosts();
+    }
+  }, [state.isAuthenticated, fetchPosts]);
+
   // Auth actions
   const login = useCallback(async (email: string, password: string) => {
     dispatch({ type: 'SET_LOADING', payload: { type: 'auth', value: true } });
@@ -186,6 +211,7 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
       localStorage.setItem('user', JSON.stringify(response.user));
       
       dispatch({ type: 'SET_USER', payload: response.user });
+      // Posts will be fetched automatically by the useEffect when isAuthenticated becomes true
     } catch (error) {
       dispatch({ 
         type: 'SET_ERROR', 
@@ -209,6 +235,7 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
       localStorage.setItem('user', JSON.stringify(response.user));
       
       dispatch({ type: 'SET_USER', payload: response.user });
+      // Posts will be fetched automatically by the useEffect when isAuthenticated becomes true
     } catch (error) {
       dispatch({ 
         type: 'SET_ERROR', 
@@ -224,24 +251,6 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     dispatch({ type: 'LOGOUT' });
-  }, []);
-
-  // Posts actions
-  const fetchPosts = useCallback(async () => {
-    dispatch({ type: 'SET_LOADING', payload: { type: 'posts', value: true } });
-    dispatch({ type: 'SET_ERROR', payload: { type: 'posts', value: null } });
-    
-    try {
-      const posts = await apiClient.getAllPosts();
-      dispatch({ type: 'SET_POSTS', payload: posts });
-    } catch (error) {
-      dispatch({ 
-        type: 'SET_ERROR', 
-        payload: { type: 'posts', value: error instanceof Error ? error.message : 'Failed to fetch posts' } 
-      });
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: { type: 'posts', value: false } });
-    }
   }, []);
 
   const fetchMyPosts = useCallback(async () => {
