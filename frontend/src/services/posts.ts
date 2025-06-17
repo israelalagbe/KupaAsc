@@ -1,5 +1,5 @@
 import { Post, CreatePostDto, UpdatePostDto } from '@/types/api';
-import { BaseApiClient, serverFetch } from './api';
+import { BaseApiClient } from './api';
 
 export class PostsService extends BaseApiClient {
   async getAll(): Promise<Post[]> {
@@ -28,10 +28,3 @@ export class PostsService extends BaseApiClient {
 }
 
 export const postsService = new PostsService();
-
-// Server-side data fetching functions
-export const fetchPostsOnServer = (): Promise<Post[]> => 
-  serverFetch('/posts', []);
-
-export const fetchPostOnServer = (id: number): Promise<Post> => 
-  serverFetch(`/posts/${id}`);

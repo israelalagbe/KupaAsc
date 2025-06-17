@@ -49,23 +49,3 @@ export class BaseApiClient {
     return this.request<T>(url, { method: 'DELETE' }, requireAuth);
   }
 }
-
-// Simplified server-side fetch helper
-export async function serverFetch<T>(endpoint: string, fallback?: T): Promise<T> {
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'no-store'
-    });
-    
-    if (!response.ok) {
-      if (response.status === 401 && fallback !== undefined) return fallback;
-      throw new Error(`Failed to fetch: ${response.status}`);
-    }
-    
-    return response.json();
-  } catch (error) {
-    if (fallback !== undefined) return fallback;
-    throw error;
-  }
-}
