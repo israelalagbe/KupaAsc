@@ -16,7 +16,7 @@ export default function AuthForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    clearError(); // Clear any previous errors
+    clearError();
     
     try {
       if (isLogin) {
@@ -24,7 +24,6 @@ export default function AuthForm() {
       } else {
         await signup(formData.email, formData.password, formData.firstName, formData.lastName);
       }
-      // No need to close since user will be redirected after successful auth
     } catch (error) {
       // Error is handled by context
     }
