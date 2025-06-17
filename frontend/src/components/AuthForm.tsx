@@ -37,12 +37,22 @@ export default function AuthForm() {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-8">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 text-center">
-          {isLogin ? 'Login' : 'Sign Up'}
-        </h2>
-      </div>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Welcome to Posts App
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Sign in to your account or create a new one
+          </p>
+        </div>
+        <div className="bg-white rounded-lg shadow-lg p-8">
+          <div className="mb-6">
+            <h3 className="text-2xl font-bold text-gray-900 text-center">
+              {isLogin ? 'Login' : 'Sign Up'}
+            </h3>
+          </div>
 
       {error && (
         <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -124,15 +134,17 @@ export default function AuthForm() {
         </button>
       </form>
 
-      <div className="mt-4 text-center">
-        <button
-          onClick={() => setIsLogin(!isLogin)}
-          className="text-blue-600 hover:text-blue-800 text-sm"
-          type="button"
-        >
-          {isLogin ? "Don't have an account? Sign up" : "Already have an account? Login"}
-        </button>
+        <div className="mt-4 text-center">
+          <button
+            onClick={() => setIsLogin(!isLogin)}
+            className="text-blue-600 hover:text-blue-800 text-sm"
+            type="button"
+          >
+            {isLogin ? "Don't have an account? Sign up" : "Already have an account? Login"}
+          </button>
+        </div>
       </div>
     </div>
+  </div>
   );
 }
