@@ -4,7 +4,6 @@ import React, { createContext, useContext, useReducer, useCallback, ReactNode, u
 import { Post, User, AuthResponse } from '@/types/api';
 import { authService, postsService } from '@/services';
 
-// Simplified state shape
 interface State {
   posts: Post[];
   user: User | null;
@@ -12,7 +11,6 @@ interface State {
   error: string | null;
 }
 
-// Simplified actions
 type Action = 
   | { type: 'SET_POSTS'; payload: Post[] }
   | { type: 'SET_USER'; payload: User | null }
@@ -39,7 +37,6 @@ const reducer = (state: State, action: Action): State => {
   }
 };
 
-// Initial state
 const initialState: State = {
   posts: [],
   user: null,
@@ -47,7 +44,6 @@ const initialState: State = {
   error: null,
 };
 
-// Context interface
 interface PostsContextValue extends State {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -61,10 +57,8 @@ interface PostsContextValue extends State {
   clearError: () => void;
 }
 
-// Create context
 const PostsContext = createContext<PostsContextValue | undefined>(undefined);
 
-// Provider component
 interface PostsProviderProps {
   children: ReactNode;
   initialPosts?: Post[];
@@ -75,7 +69,6 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
 
   const isAuthenticated = Boolean(state.user);
 
-  // Helper to handle async actions with loading/error states
   const withAsyncHandler = useCallback(async (
     action: () => Promise<void>,
     errorMessage: string
@@ -92,14 +85,12 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
     }
   }, []);
 
-  // Helper for auth actions
   const handleAuthSuccess = useCallback((response: AuthResponse) => {
     localStorage.setItem('token', response.access_token);
     localStorage.setItem('user', JSON.stringify(response.user));
     dispatch({ type: 'SET_USER', payload: response.user });
   }, []);
 
-  // Initialize user from localStorage
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
@@ -113,8 +104,7 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
     }
   }, []);
 
-    // Actions
-  const fetchPosts = useCallback(() => withAsyncHandler(
+    const fetchPosts = useCallback(() => withAsyncHandler(
     async () => {
       const posts = await postsService.getAll();
       dispatch({ type: 'SET_POSTS', payload: posts });
@@ -185,7 +175,6 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
     dispatch({ type: 'SET_ERROR', payload: null });
   }, []);
 
-  // Auto-fetch posts when authenticated
   useEffect(() => {
     if (isAuthenticated) fetchPosts();
   }, [isAuthenticated, fetchPosts]);
@@ -211,7 +200,6 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
   );
 }
 
-// Hook to use the context
 export function usePosts() {
   const context = useContext(PostsContext);
   if (context === undefined) {
