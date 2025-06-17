@@ -266,8 +266,9 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
     dispatch({ type: 'SET_ERROR', payload: { type: 'create', value: null } });
     
     try {
-      const post = await apiClient.createPost({ title, content, published });
-      dispatch({ type: 'ADD_POST', payload: post });
+      await apiClient.createPost({ title, content, published });
+      // Refresh all posts to get complete data with author information
+      await fetchPosts();
     } catch (error) {
       dispatch({ 
         type: 'SET_ERROR', 
@@ -277,7 +278,7 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
     } finally {
       dispatch({ type: 'SET_LOADING', payload: { type: 'create', value: false } });
     }
-  }, []);
+  }, [fetchPosts]);
 
   const updatePost = useCallback(async (id: number, title?: string, content?: string, published?: boolean) => {
     dispatch({ type: 'SET_LOADING', payload: { type: 'update', value: true } });
