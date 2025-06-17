@@ -45,7 +45,23 @@ class ApiClient {
       throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
 
-    return response.json();
+    // Handle empty responses (like DELETE operations)
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      return null;
+    }
+
+    const text = await response.text();
+    if (!text.trim()) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch (error) {
+      console.warn('Failed to parse JSON response:', text);
+      return null;
+    }
   }
 
   // Auth endpoints
