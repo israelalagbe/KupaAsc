@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useReducer, useCallback, ReactNode, useEffect } from 'react';
 import { Post, User, AuthResponse } from '@/types/api';
-import { apiClient } from '@/lib/api';
+import { authService, postsService } from '@/services';
 
 // Simplified state shape
 interface State {
@@ -113,10 +113,10 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
     }
   }, []);
 
-  // Actions
+    // Actions
   const fetchPosts = useCallback(() => withAsyncHandler(
     async () => {
-      const posts = await apiClient.getAllPosts();
+      const posts = await postsService.getAll();
       dispatch({ type: 'SET_POSTS', payload: posts });
     },
     'Failed to fetch posts'
@@ -124,7 +124,7 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
 
   const fetchMyPosts = useCallback(() => withAsyncHandler(
     async () => {
-      const posts = await apiClient.getMyPosts();
+      const posts = await postsService.getMy();
       dispatch({ type: 'SET_POSTS', payload: posts });
     },
     'Failed to fetch your posts'
@@ -132,7 +132,7 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
 
   const login = useCallback((email: string, password: string) => withAsyncHandler(
     async () => {
-      const response = await apiClient.login({ email, password });
+      const response = await authService.login({ email, password });
       handleAuthSuccess(response);
     },
     'Login failed'
@@ -140,7 +140,7 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
 
   const signup = useCallback((email: string, password: string, firstName: string, lastName: string) => withAsyncHandler(
     async () => {
-      const response = await apiClient.signup({ email, password, firstName, lastName });
+      const response = await authService.signup({ email, password, firstName, lastName });
       handleAuthSuccess(response);
     },
     'Signup failed'
@@ -148,7 +148,7 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
 
   const createPost = useCallback((title: string, content: string, published = true) => withAsyncHandler(
     async () => {
-      await apiClient.createPost({ title, content, published });
+      await postsService.create({ title, content, published });
       await fetchPosts();
     },
     'Failed to create post'
@@ -160,7 +160,7 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
       if (title !== undefined) updateData.title = title;
       if (content !== undefined) updateData.content = content;
       if (published !== undefined) updateData.published = published;
-      const post = await apiClient.updatePost(id, updateData);
+      const post = await postsService.update(id, updateData);
       dispatch({ type: 'UPDATE_POST', payload: post });
     },
     'Failed to update post'
@@ -168,7 +168,7 @@ export function PostsProvider({ children, initialPosts = [] }: PostsProviderProp
 
   const deletePost = useCallback((id: number) => withAsyncHandler(
     async () => {
-      await apiClient.deletePost(id);
+      await postsService.delete(id);
       dispatch({ type: 'DELETE_POST', payload: id });
     },
     'Failed to delete post'
