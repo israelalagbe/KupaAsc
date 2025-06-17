@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { usePosts } from '@/contexts/PostsContext';
-import AuthForm from '@/components/AuthForm';
 import CreatePostForm from '@/components/CreatePostForm';
 import PostsList from '@/components/PostsList';
 import UserProfile from '@/components/UserProfile';
@@ -10,9 +10,16 @@ import UserProfile from '@/components/UserProfile';
 export default function Home() {
   const { isAuthenticated, user, posts, loading, error, clearError } = usePosts();
   const [activeTab, setActiveTab] = useState<'all' | 'my-posts'>('all');
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/auth');
+    }
+  }, [isAuthenticated, router]);
 
   if (!isAuthenticated) {
-    return <AuthForm />;
+    return null; // Will redirect to /auth
   }
 
   return (

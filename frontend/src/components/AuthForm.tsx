@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { usePosts } from '@/contexts/PostsContext';
 
 export default function AuthForm() {
@@ -13,6 +14,7 @@ export default function AuthForm() {
   });
 
   const { login, signup, loading, error, clearError } = usePosts();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +26,8 @@ export default function AuthForm() {
       } else {
         await signup(formData.email, formData.password, formData.firstName, formData.lastName);
       }
+      
+      router.push('/');
     } catch (error) {
       // Error is handled by context
     }

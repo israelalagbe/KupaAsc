@@ -1,15 +1,18 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { usePosts } from '@/contexts/PostsContext';
 
 export default function UserProfile() {
   const { user, logout, fetchPosts, fetchMyPosts } = usePosts();
   const [showDropdown, setShowDropdown] = useState(false);
+  const router = useRouter();
 
   const handleLogout = () => {
     logout();
     setShowDropdown(false);
+    router.push('/auth');
   };
 
   const handleRefresh = async () => {
